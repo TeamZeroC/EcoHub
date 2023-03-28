@@ -1,5 +1,10 @@
 # EcoHub
 (Almost) Every Team-0C tool in one application
+> **INDEX:**
+> 1. [Setup](https://github.com/TeamZeroC/EcoHub/edit/master/README.md#setup)
+> 2. [Omg Errors!](https://github.com/TeamZeroC/EcoHub/edit/master/README.md#omg-errors)
+> 3. [Project Workflow](https://github.com/TeamZeroC/EcoHub/edit/master/README.md#project-workflow)
+> 4. [Applications](https://github.com/TeamZeroC/EcoHub/edit/master/README.md#applications)
 
 # Setup
 - Install the [vcpck](https://vcpkg.io/en/) package manager.
