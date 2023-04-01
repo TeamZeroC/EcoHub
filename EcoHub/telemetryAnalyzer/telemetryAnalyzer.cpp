@@ -304,7 +304,7 @@ void TelemetryAnalyzer::_analysisTool()
 	ImGui::SetNextWindowSize(ImVec2(230, 330), ImGuiCond_Appearing);
 	ImGui::Begin("TOOLs", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
-	if (!slots.empty()) //  && slots[0].inputPath != ""
+	if (!slots.empty() && slots[0].inputPath != "")
 	{
 		// LAP FOCUS TOOL
 		ImGui::Checkbox("LAPS FOCUS:", &lapsFocusTool);

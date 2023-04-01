@@ -13,7 +13,7 @@ int selectedAppIndex = 2;
 
 void menuBar()
 {
-	ImGui::SetNextItemWidth(150);
+	ImGui::SetNextItemWidth(160);
 	if (ImGui::BeginCombo("##AppSelector", apps[selectedAppIndex]))
 	{
 		for (int i = 0; i < IM_ARRAYSIZE(apps); i++)
@@ -46,7 +46,7 @@ int main()
 	IGH.pushLayer<MotorPlotter>();
 	IGH.pushLayer<TelemetryAnalyzer>();
 
-	if (!IGH.init(L"Eco Hub", 1300, 800))
+	if (!IGH.init("Eco Hub", 1300, 800))
 		return 1;
 	ImPlot::CreateContext();
 

@@ -1,5 +1,10 @@
 #pragma once
 
+//#define USE_DX12
+#define USE_OPENGL3
+
+#ifdef USE_DX12
+
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx12.h"
@@ -22,8 +27,6 @@
 #include <dxgidebug.h>
 #pragma comment(lib, "dxguid.lib")
 #endif
-
-
 
 struct FrameContext
 {
@@ -58,6 +61,33 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#endif
+
+#ifdef USE_OPENGL3
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <stdio.h>
+#define GL_SILENCE_DEPRECATION
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+#include <GLES2/gl2.h>
+#endif
+#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+
+// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
+// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
+// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+
+#include <string>
+#include <vector>
+#include <functional>
+
+#endif
+
 typedef void (*WinBlock)();
 
 class appLayer
@@ -74,8 +104,14 @@ class ImGuiHandle
 {
 private:
 
+#ifdef USE_DX12
 	WNDCLASSEXW _wc;
 	HWND _hwnd;
+#endif
+
+#ifdef USE_OPENGL3
+	GLFWwindow* window;
+#endif
 
 	WinBlock _bgFunc = nullptr;
 	WinBlock _menuBar = nullptr;
@@ -87,8 +123,15 @@ public:
 
 	ImGuiHandle() {}
 
+#ifdef USE_DX12
 	bool init(LPCWSTR bigParentName);
 	bool init(LPCWSTR bigParentName, unsigned int bigParentW, unsigned int bigParentH);
+#endif
+
+#ifdef USE_OPENGL3
+	bool init(std::string bigParentName);
+	bool init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH);
+#endif
 
 	void menuBar(WinBlock menuBarContent) { _menuBar = menuBarContent; }
 	void bgDeamon(WinBlock bgFunc) { _bgFunc = bgFunc; }
