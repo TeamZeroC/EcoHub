@@ -10,7 +10,7 @@
 - Install the [vcpck](https://vcpkg.io/en/) package manager.
 - Install the following packages:
   - Boost ➜ ```vcpkg install boost:x64-windows```
-  - ImGui ➜ ```vcpkg install imgui[core, dx12-binding, win32-binding]:x64-windows```
+  - ImGui ➜ ```vcpkg install imgui[core,dx12-binding,win32-binding]:x64-windows```
   - ImPlot ➜ ```vcpkg install implot:x64-windows```
 - Restart Visual Studio (if open).
 
