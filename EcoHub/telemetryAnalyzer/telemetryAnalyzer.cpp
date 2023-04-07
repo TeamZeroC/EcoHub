@@ -412,9 +412,9 @@ void TelemetryAnalyzer::_analysisTool()
 			{
 				for (int i = 0; i < slots.size(); i++)
 				{
-					if (ImGui::Selectable(std::string("SLOT " + std::to_string(i)).c_str()))
+					if (ImGui::Selectable(std::string("SLOT " + std::to_string(i + 1)).c_str()))
 					{
-						missActSelectedSlot = "SLOT " + std::to_string(i);
+						missActSelectedSlot = "SLOT " + std::to_string(i + 1);
 						missActSelectedSlotIndex = i;
 					}
 				}
@@ -455,22 +455,26 @@ void TelemetryAnalyzer::_analysisTool()
 				findBadSimPath = std::string(findBadSimPath_buff);
 				if (std::filesystem::exists(findBadSimPath))
 				{
-					__parseSimCsv(findBadSimPath);
+					if (findBadParseType == 0)
+						__parseSimCsv(findBadSimPath);
+					else if (findBadParseType == 1)
+						__parseCompareCsv(findBadSimPath);
 				}
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("BROWSE"))
 			{
-				csvpathDialog.SetTitle("SELECT .CSV");
-				csvpathDialog.SetTypeFilters({ ".csv", ".txt" });
-				csvpathDialog.Open();
+				csvCompPathDialog.SetTitle("SELECT .CSV");
+				csvCompPathDialog.SetTypeFilters({ ".csv", ".txt" });
+				csvCompPathDialog.Open();
 			}
 
-			csvpathDialog.Display();
-			if (csvpathDialog.HasSelected())
+			csvCompPathDialog.Display();
+			if (csvCompPathDialog.HasSelected())
 			{
-				findBadSimPath = csvpathDialog.GetSelected().string();
+				findBadSimPath = csvCompPathDialog.GetSelected().string();
+				findBadSimInstVel.clear();
 
 				if (findBadParseType == 0)
 					__parseSimCsv(findBadSimPath);
@@ -478,16 +482,16 @@ void TelemetryAnalyzer::_analysisTool()
 					__parseCompareCsv(findBadSimPath);
 
 				strcpy_s(findBadSimPath_buff, findBadSimPath.c_str());
-				csvpathDialog.ClearSelected();
+				csvCompPathDialog.ClearSelected();
 			}
 
 			if (ImGui::BeginCombo("Compare to slot", findBadSelectedSlot.c_str()))
 			{
 				for (int i = 0; i < slots.size(); i++)
 				{
-					if (ImGui::Selectable(std::string("SLOT " + std::to_string(i)).c_str()))
+					if (ImGui::Selectable(std::string("SLOT " + std::to_string(i + 1)).c_str()))
 					{
-						findBadSelectedSlot = "SLOT " + std::to_string(i);
+						findBadSelectedSlot = "SLOT " + std::to_string(i + 1);
 						findBadSelectedSlotIndex = i;
 					}
 				}

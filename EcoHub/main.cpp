@@ -21,19 +21,7 @@ void menuBar()
 			if (ImGui::Selectable(apps[i]))
 			{
 				selectedAppIndex = i;
-
-				switch (selectedAppIndex)
-				{
-				case 0:
-					IGH.setActiveWin(0);
-					break;
-				case 1:
-					IGH.setActiveWin(1);
-					break;
-				case 2:
-					IGH.setActiveWin(2);
-					break;
-				}
+				IGH.setActiveWin(i);
 			}
 		}
 		ImGui::EndCombo();
@@ -49,6 +37,8 @@ int main()
 	if (!IGH.init("Eco Hub", 1300, 800))
 		return 1;
 	ImPlot::CreateContext();
+
+	ImGui::GetIO().IniFilename = NULL;
 
 	IGH.menuBar(menuBar);
 	IGH.setActiveWin(2);

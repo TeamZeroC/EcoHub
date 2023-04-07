@@ -92,6 +92,7 @@ private:
 	int findBadParseType = 0;
 	char findBadSimPath_buff[200] = "";
 	std::string findBadSimPath;
+	ImGui::FileBrowser csvCompPathDialog;
 	std::string findBadSelectedSlot = "None";
 	int findBadSelectedSlotIndex = 0;
 	std::vector<ImVec2> findBadSimInstVel;
