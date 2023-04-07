@@ -85,10 +85,9 @@ class appLayer
 public:
 	virtual ~appLayer() = default;
 
-	virtual void update() {}
+	virtual void update() = 0;
 	virtual void menuBar() {}
 };
-
 
 class ImGuiHandle
 {
