@@ -13,14 +13,15 @@
 
 struct slotData_s
 {
-	ImVec2 pos = {20, 30};
+	ImVec2 pos = { 20, 30 };
 	ImVec2 size = { 230, 300 };
 	int ofset = 30;
 
 	char inputPath_buff[200] = "";
 	std::string inputPath;
 
-	bool toDispaly[5] = { true, true, false, false, false };
+	std::vector<std::string> graphsNames = { "InstantSpeed", "AverageSpeed", "SteerAngle", "BatteryVoltage", "MotorPower /10" };
+	bool toDispaly[5] = { true, false, false, false, false };
 
 	std::string graphInstSpeed_name;
 	std::string graphAvgSpeed_name;
@@ -28,11 +29,22 @@ struct slotData_s
 	std::string graphBattVoltage_name;
 	std::string graphMotorPower_name;
 
+	std::vector<float> gpos;
+	std::vector<float> ginst;
+	std::vector<float> gavg;
+	std::vector<float> gsteer;
+	std::vector<float> gvbat;
+	std::vector<float> gcurr;
+
 	std::vector<ImVec2> instSpeed;
 	std::vector<ImVec2> avgSpeed;
 	std::vector<ImVec2> steerAngle;
 	std::vector<ImVec2> battVoltage;
 	std::vector<ImVec2> motorPower;
+
+	std::vector<float> kConsts = std::vector<float>(5, 1.0);
+	float ofsetsConsts_buff[2] = { 0.0f, 0.0f };
+	std::vector<ImVec2> ofsetsConsts = std::vector<ImVec2>(5);
 };
 
 struct genericSlotData_s
@@ -46,17 +58,23 @@ struct genericSlotData_s
 
 	char newCol_buff[128] = "";
 	std::vector<std::string> cols;
+
 	std::vector<float> kConsts;
+	float ofsetsConsts_buff[2] = { 0.0f, 0.0f };
+	std::vector<ImVec2> ofsetsConsts;
+
 	std::vector<std::vector<ImVec2>> graphs;
 };
 
 class TelemetryAnalyzer : public appLayer
 {
 private:
+	void __calculateSlotGraphs(slotData_s& slot);
 	void __parseCsv(slotData_s& slot);
 	void __parseGenericCsv(genericSlotData_s& slot);
+	void __slotGraphContextMenu(slotData_s& slot, int index);
 	void __updateLapsFocusToolLines();
-	void __parseSimCsv(std::string &path);
+	void __parseSimCsv(std::string& path);
 	void __parseCompareCsv(std::string& path);
 
 	void _slotsHandler();
@@ -159,7 +177,7 @@ public:
 			if (ImGui::IsItemHovered())
 			{
 				ImGui::BeginTooltip();
-				ImGui::Text("Add a \"generic slot\" wich allows to plot custom columns from any .csv file");
+				ImGui::Text("Add a \"generic slot\" wich allows to\nplot custom columns from any .csv file");
 				ImGui::EndTooltip();
 			}
 

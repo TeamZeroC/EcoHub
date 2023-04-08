@@ -1,33 +1,36 @@
 #include "telemetryAnalyzer.h"
 
-void TelemetryAnalyzer::__parseCsv(slotData_s& slot)
+void TelemetryAnalyzer::__calculateSlotGraphs(slotData_s& slot)
 {
-	rapidcsv::Document csv(slot.inputPath, rapidcsv::LabelParams(), rapidcsv::SeparatorParams(), rapidcsv::ConverterParams(true));
-
-	std::vector<float> gpos = csv.GetColumn<float>("DISTANCE (0x202)");
-
-	std::vector<float> ginst = csv.GetColumn<float>("IST_VEL (0x200)");
-	std::vector<float> gavg = csv.GetColumn<float>("AVG_VEL (0x201)");
-	std::vector<float> gsteer = csv.GetColumn<float>("STEER_ANGLE (0x502)");
-	std::vector<float> gvbat = csv.GetColumn<float>("PACK_V (0x410)");
-	std::vector<float> gcurr = csv.GetColumn<float>("PACK_I (0x413)");
-
 	slot.instSpeed.clear();
 	slot.avgSpeed.clear();
 	slot.steerAngle.clear();
 	slot.battVoltage.clear();
 	slot.motorPower.clear();
 
-	bool firstZeros = true;
-
-	for (int j = 0; j < gpos.size(); j++)
+	for (int j = 0; j < slot.gpos.size(); j++)
 	{
-		slot.instSpeed.push_back(ImVec2(gpos[j], ginst[j] * 3.6f));
-		slot.avgSpeed.push_back(ImVec2(gpos[j], gavg[j] * 3.6f));
-		slot.steerAngle.push_back(ImVec2(gpos[j], gsteer[j]));
-		slot.battVoltage.push_back(ImVec2(gpos[j], gvbat[j]));
-		slot.motorPower.push_back(ImVec2(gpos[j], gvbat[j] * gcurr[j] / 10.0f));
+		slot.instSpeed.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[0].x, slot.ginst[j] * 3.6f * slot.kConsts[0] + slot.ofsetsConsts[0].y));
+		slot.avgSpeed.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[1].x, slot.gavg[j] * 3.6f * slot.kConsts[1] + slot.ofsetsConsts[1].y));
+		slot.steerAngle.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[2].x, slot.gsteer[j] * slot.kConsts[2] + slot.ofsetsConsts[2].y));
+		slot.battVoltage.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[3].x, slot.gvbat[j] * slot.kConsts[3] + slot.ofsetsConsts[3].y));
+		slot.motorPower.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[4].x, slot.gvbat[j] * slot.gcurr[j] / 10.0f * slot.kConsts[4] + slot.ofsetsConsts[4].y));
 	}
+}
+
+void TelemetryAnalyzer::__parseCsv(slotData_s& slot)
+{
+	rapidcsv::Document csv(slot.inputPath, rapidcsv::LabelParams(), rapidcsv::SeparatorParams(), rapidcsv::ConverterParams(true));
+
+	slot.gpos = csv.GetColumn<float>("DISTANCE (0x202)");
+
+	slot.ginst = csv.GetColumn<float>("IST_VEL (0x200)");
+	slot.gavg = csv.GetColumn<float>("AVG_VEL (0x201)");
+	slot.gsteer = csv.GetColumn<float>("STEER_ANGLE (0x502)");
+	slot.gvbat = csv.GetColumn<float>("PACK_V (0x410)");
+	slot.gcurr = csv.GetColumn<float>("PACK_I (0x413)");
+
+	__calculateSlotGraphs(slot);
 
 	ImPlot::SetNextAxesToFit();
 }
@@ -60,6 +63,38 @@ void TelemetryAnalyzer::__parseGenericCsv(genericSlotData_s& slot)
 		i++;
 	}
 	ImPlot::SetNextAxesToFit();
+}
+
+void TelemetryAnalyzer::__slotGraphContextMenu(slotData_s& slot, int index)
+{
+	if (ImGui::BeginPopupContextItem())
+	{
+		ImGui::Text(std::string("\"" + slot.graphsNames[index] + "\" OPTIONS").c_str());
+
+		ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+		ImGui::Text("Scale factor");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(170.0f);
+		if (ImGui::InputFloat("##K_const", &slot.kConsts[index], 0.2f, 1.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			__calculateSlotGraphs(slot);
+		}
+
+		slot.ofsetsConsts_buff[0] = slot.ofsetsConsts[index].x;
+		slot.ofsetsConsts_buff[1] = slot.ofsetsConsts[index].y;
+		ImGui::Text("Ofsets (X / Y)");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(156.0f);
+		if (ImGui::InputFloat2("##Ofsets", slot.ofsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			slot.ofsetsConsts[index].x = slot.ofsetsConsts_buff[0];
+			slot.ofsetsConsts[index].y = slot.ofsetsConsts_buff[1];
+
+			__calculateSlotGraphs(slot);
+		}
+		ImGui::EndPopup();
+	}
 }
 
 void TelemetryAnalyzer::_slotsHandler()
@@ -107,11 +142,17 @@ void TelemetryAnalyzer::_slotsHandler()
 			csvpathDialog.ClearSelected();
 		}
 
-		ImGui::Checkbox("InstantSpeed", &slot.toDispaly[0]);
+		for (int j = 0; j < slot.graphsNames.size(); j++)
+		{
+			ImGui::Checkbox(slot.graphsNames[j].c_str(), &slot.toDispaly[j]);
+			__slotGraphContextMenu(slot, j);
+		}
+
+		/*ImGui::Checkbox("InstantSpeed", &slot.toDispaly[0]);
 		ImGui::Checkbox("AverageSpeed", &slot.toDispaly[1]);
 		ImGui::Checkbox("SteerAngle", &slot.toDispaly[2]);
 		ImGui::Checkbox("BatteryVoltage", &slot.toDispaly[3]);
-		ImGui::Checkbox("MotorPower /10", &slot.toDispaly[4]);
+		ImGui::Checkbox("MotorPower /10", &slot.toDispaly[4]);*/
 
 		ImGui::End();
 		i++;
@@ -153,23 +194,54 @@ void TelemetryAnalyzer::_genericSlotsHandler()
 			csvpathDialog.ClearSelected();
 		}
 
+		ImGui::Spacing();
 		ImGui::InputTextWithHint("##NewColInput", "NEW COLUMN", slot.newCol_buff, IM_ARRAYSIZE(slot.newCol_buff));
 		ImGui::SameLine();
-		if (ImGui::Button("+"))
+		if (ImGui::Button("+") && strlen(slot.newCol_buff) > 0)
 		{
 			slot.cols.push_back(std::string(slot.newCol_buff));
 			slot.kConsts.push_back(1.0f);
+			slot.ofsetsConsts.push_back(ImVec2(0.0f, 0.0f));
 			slot.newCol_buff[0] = '\0';
 		}
 
 		for (int j = 0; j < slot.cols.size(); j++)
 		{
-			ImGui::Text(slot.cols[j].c_str());
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(40.0f);
-			ImGui::InputFloat("##K_const", &slot.kConsts[j], 0.0f, 0.0f, "%.2f");
-			// TODO: Remove graph option
+			ImGui::BulletText(slot.cols[j].c_str());
+			if (ImGui::BeginPopupContextItem(std::string(slot.cols[j] + " menu").c_str()))
+			{
+				ImGui::Text("\"%s\" OPTIONS:", slot.cols[j].c_str());
+
+				ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+				ImGui::Text("Scale factor");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(170.0f);
+				ImGui::InputFloat("##K_const", &slot.kConsts[j], 0.0f, 0.0f, "%.2f");
+
+				slot.ofsetsConsts_buff[0] = slot.ofsetsConsts[j].x;
+				slot.ofsetsConsts_buff[1] = slot.ofsetsConsts[j].y;
+				ImGui::Text("Ofsets (X / Y)");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(156.0f);
+				if (ImGui::InputFloat2("##Ofsets", slot.ofsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					slot.ofsetsConsts[j].x = slot.ofsetsConsts_buff[0];
+					slot.ofsetsConsts[j].y = slot.ofsetsConsts_buff[1];
+				}
+
+				ImGui::Separator(); ImGui::Spacing();
+
+				if (ImGui::Button("Delete"))
+				{
+					ImGui::CloseCurrentPopup();
+					slot.cols.erase(slot.cols.begin() + j);
+				}
+				ImGui::EndPopup();
+			}
 		}
+
+		ImGui::Spacing(); ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
 		if (ImGui::Button("PLOT"))
 		{
@@ -288,7 +360,7 @@ void TelemetryAnalyzer::__parseSimCsv(std::string& path)
 void TelemetryAnalyzer::__parseCompareCsv(std::string& path)
 {
 	rapidcsv::Document csv(path, rapidcsv::LabelParams(), rapidcsv::SeparatorParams(), rapidcsv::ConverterParams(true));
-	
+
 	std::vector<float> gpos = csv.GetColumn<float>("DISTANCE (0x202)");
 	std::vector<float> ginst = csv.GetColumn<float>("IST_VEL (0x200)");
 
@@ -322,16 +394,16 @@ void TelemetryAnalyzer::_analysisTool()
 					__updateLapsFocusToolLines();
 					break;
 				case 1: // Marzaglia
-					fristLapL = 1430; // Random value TO FIX
-					midLapL = 1450; // Random value TO FIX
-					lastLapL = 1400; // Random value TO FIX
+					fristLapL = 1830;
+					midLapL = 1830;
+					lastLapL = 1830;
 					preciseMode = true;
 					__updateLapsFocusToolLines();
 					break;
 				case 2: // Nogarò
-					fristLapL = 1230; // Random value TO FIX
-					midLapL = 1250; // Random value TO FIX
-					lastLapL = 1200; // Random value TO FIX
+					fristLapL = 1620;
+					midLapL = 1620;
+					lastLapL = 1620;
 					preciseMode = true;
 					__updateLapsFocusToolLines();
 					break;
