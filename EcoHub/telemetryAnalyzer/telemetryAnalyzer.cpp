@@ -10,11 +10,11 @@ void TelemetryAnalyzer::__calculateSlotGraphs(slotData_s& slot)
 
 	for (int j = 0; j < slot.gpos.size(); j++)
 	{
-		slot.instSpeed.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[0].x, slot.ginst[j] * 3.6f * slot.kConsts[0] + slot.ofsetsConsts[0].y));
-		slot.avgSpeed.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[1].x, slot.gavg[j] * 3.6f * slot.kConsts[1] + slot.ofsetsConsts[1].y));
-		slot.steerAngle.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[2].x, slot.gsteer[j] * slot.kConsts[2] + slot.ofsetsConsts[2].y));
-		slot.battVoltage.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[3].x, slot.gvbat[j] * slot.kConsts[3] + slot.ofsetsConsts[3].y));
-		slot.motorPower.push_back(ImVec2(slot.gpos[j] + slot.ofsetsConsts[4].x, slot.gvbat[j] * slot.gcurr[j] / 10.0f * slot.kConsts[4] + slot.ofsetsConsts[4].y));
+		slot.instSpeed.push_back(ImVec2(slot.gpos[j] + slot.offsetsConsts[0].x, slot.ginst[j] * 3.6f * slot.kConsts[0] + slot.offsetsConsts[0].y));
+		slot.avgSpeed.push_back(ImVec2(slot.gpos[j] + slot.offsetsConsts[1].x, slot.gavg[j] * 3.6f * slot.kConsts[1] + slot.offsetsConsts[1].y));
+		slot.steerAngle.push_back(ImVec2(slot.gpos[j] + slot.offsetsConsts[2].x, slot.gsteer[j] * slot.kConsts[2] + slot.offsetsConsts[2].y));
+		slot.battVoltage.push_back(ImVec2(slot.gpos[j] + slot.offsetsConsts[3].x, slot.gvbat[j] * slot.kConsts[3] + slot.offsetsConsts[3].y));
+		slot.motorPower.push_back(ImVec2(slot.gpos[j] + slot.offsetsConsts[4].x, slot.gvbat[j] * slot.gcurr[j] / 10.0f * slot.kConsts[4] + slot.offsetsConsts[4].y));
 	}
 }
 
@@ -81,15 +81,15 @@ void TelemetryAnalyzer::__slotGraphContextMenu(slotData_s& slot, int index)
 			__calculateSlotGraphs(slot);
 		}
 
-		slot.ofsetsConsts_buff[0] = slot.ofsetsConsts[index].x;
-		slot.ofsetsConsts_buff[1] = slot.ofsetsConsts[index].y;
-		ImGui::Text("Ofsets (X / Y)");
+		slot.offsetsConsts_buff[0] = slot.offsetsConsts[index].x;
+		slot.offsetsConsts_buff[1] = slot.offsetsConsts[index].y;
+		ImGui::Text("Offsets (X / Y)");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(156.0f);
-		if (ImGui::InputFloat2("##Ofsets", slot.ofsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+		if (ImGui::InputFloat2("##Ofsets", slot.offsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
-			slot.ofsetsConsts[index].x = slot.ofsetsConsts_buff[0];
-			slot.ofsetsConsts[index].y = slot.ofsetsConsts_buff[1];
+			slot.offsetsConsts[index].x = slot.offsetsConsts_buff[0];
+			slot.offsetsConsts[index].y = slot.offsetsConsts_buff[1];
 
 			__calculateSlotGraphs(slot);
 		}
@@ -201,7 +201,7 @@ void TelemetryAnalyzer::_genericSlotsHandler()
 		{
 			slot.cols.push_back(std::string(slot.newCol_buff));
 			slot.kConsts.push_back(1.0f);
-			slot.ofsetsConsts.push_back(ImVec2(0.0f, 0.0f));
+			slot.offsetsConsts.push_back(ImVec2(0.0f, 0.0f));
 			slot.newCol_buff[0] = '\0';
 		}
 
@@ -219,15 +219,15 @@ void TelemetryAnalyzer::_genericSlotsHandler()
 				ImGui::SetNextItemWidth(170.0f);
 				ImGui::InputFloat("##K_const", &slot.kConsts[j], 0.0f, 0.0f, "%.2f");
 
-				slot.ofsetsConsts_buff[0] = slot.ofsetsConsts[j].x;
-				slot.ofsetsConsts_buff[1] = slot.ofsetsConsts[j].y;
-				ImGui::Text("Ofsets (X / Y)");
+				slot.offsetsConsts_buff[0] = slot.offsetsConsts[j].x;
+				slot.offsetsConsts_buff[1] = slot.offsetsConsts[j].y;
+				ImGui::Text("Offsets (X / Y)");
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(156.0f);
-				if (ImGui::InputFloat2("##Ofsets", slot.ofsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+				if (ImGui::InputFloat2("##Ofsets", slot.offsetsConsts_buff, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
 				{
-					slot.ofsetsConsts[j].x = slot.ofsetsConsts_buff[0];
-					slot.ofsetsConsts[j].y = slot.ofsetsConsts_buff[1];
+					slot.offsetsConsts[j].x = slot.offsetsConsts_buff[0];
+					slot.offsetsConsts[j].y = slot.offsetsConsts_buff[1];
 				}
 
 				ImGui::Separator(); ImGui::Spacing();

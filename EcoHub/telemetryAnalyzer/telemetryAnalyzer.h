@@ -43,8 +43,8 @@ struct slotData_s
 	std::vector<ImVec2> motorPower;
 
 	std::vector<float> kConsts = std::vector<float>(5, 1.0);
-	float ofsetsConsts_buff[2] = { 0.0f, 0.0f };
-	std::vector<ImVec2> ofsetsConsts = std::vector<ImVec2>(5);
+	float offsetsConsts_buff[2] = { 0.0f, 0.0f };
+	std::vector<ImVec2> offsetsConsts = std::vector<ImVec2>(5);
 };
 
 struct genericSlotData_s
@@ -60,8 +60,8 @@ struct genericSlotData_s
 	std::vector<std::string> cols;
 
 	std::vector<float> kConsts;
-	float ofsetsConsts_buff[2] = { 0.0f, 0.0f };
-	std::vector<ImVec2> ofsetsConsts;
+	float offsetsConsts_buff[2] = { 0.0f, 0.0f };
+	std::vector<ImVec2> offsetsConsts;
 
 	std::vector<std::vector<ImVec2>> graphs;
 };
