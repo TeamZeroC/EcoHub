@@ -237,18 +237,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-bool ImGuiHandle::init(LPCWSTR bigParentName)
+bool ImGuiHandle::init(std::string bigParentName)
 {
 	return init(bigParentName, 1200, 800);
 }
 
-bool ImGuiHandle::init(LPCWSTR bigParentName, unsigned int bigParentW, unsigned int bigParentH)
+bool ImGuiHandle::init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH)
 {
+	_bigParentName_temp = std::wstring(bigParentName.begin(), bigParentName.end());
+	_bigParentName = _bigParentName_temp.c_str();
 	// Create application window
 	// ImGui_ImplWin32_EnableDpiAwareness();
-	WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, bigParentName, NULL };
+	WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _bigParentName, NULL };
 	::RegisterClassExW(&wc);
-	HWND hwnd = ::CreateWindowW(wc.lpszClassName, bigParentName, WS_OVERLAPPEDWINDOW, 80, 18, bigParentW, bigParentH, NULL, NULL, wc.hInstance, NULL);
+	HWND hwnd = ::CreateWindowW(wc.lpszClassName, _bigParentName, WS_OVERLAPPEDWINDOW, 80, 18, bigParentW, bigParentH, NULL, NULL, wc.hInstance, NULL);
 
 	_wc = wc;
 	_hwnd = hwnd;

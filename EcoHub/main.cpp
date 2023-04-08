@@ -30,6 +30,11 @@ void menuBar()
 
 int main()
 {
+
+#if !defined(_DEBUG)
+	FreeConsole();
+#endif
+
 	IGH.pushLayer<PaperUI>();
 	IGH.pushLayer<MotorPlotter>();
 	IGH.pushLayer<TelemetryAnalyzer>();

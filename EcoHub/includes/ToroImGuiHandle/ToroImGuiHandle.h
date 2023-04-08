@@ -1,7 +1,8 @@
 #pragma once
 
-//#define USE_DX12
-#define USE_OPENGL3
+#define USE_DX12
+// #define USE_OPENGL3
+
 
 #ifdef USE_DX12
 
@@ -96,6 +97,8 @@ private:
 #ifdef USE_DX12
 	WNDCLASSEXW _wc;
 	HWND _hwnd;
+	std::wstring _bigParentName_temp;
+	LPCWSTR _bigParentName;
 #endif
 
 #ifdef USE_OPENGL3
@@ -113,10 +116,10 @@ public:
 	ImGuiHandle() {}
 
 #ifdef USE_DX12
-	bool init(LPCWSTR bigParentName);
-	bool init(LPCWSTR bigParentName, unsigned int bigParentW, unsigned int bigParentH);
+	bool init(std::string bigParentName);
+	bool init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH);
 #endif
-
+	
 #ifdef USE_OPENGL3
 	bool init(std::string bigParentName);
 	bool init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH);
