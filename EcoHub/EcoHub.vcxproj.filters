@@ -30,6 +30,12 @@
     <ClCompile Include="main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="debugConsole\debugConsole.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\ceSerial\ceSerial.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\ToroImGuiHandle\ToroImGuiHandle.h">
@@ -51,6 +57,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="telemetryAnalyzer\telemetryAnalyzer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="debugConsole\debugConsole.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\ceSerial\ceSerial.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

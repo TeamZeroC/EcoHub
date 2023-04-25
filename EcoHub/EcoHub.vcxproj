@@ -136,6 +136,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="debugConsole\debugConsole.cpp" />
+    <ClCompile Include="includes\ceSerial\ceSerial.cpp" />
     <ClCompile Include="includes\ToroImGuiHandle\ToroImGuiHandle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="motorPlotter\motorPlotter.cpp" />
@@ -143,6 +145,8 @@
     <ClCompile Include="telemetryAnalyzer\telemetryAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="debugConsole\debugConsole.h" />
+    <ClInclude Include="includes\ceSerial\ceSerial.h" />
     <ClInclude Include="includes\ClipboardXX.h" />
     <ClInclude Include="includes\csvparser.h" />
     <ClInclude Include="includes\imfilebrowser.h" />

@@ -7,8 +7,9 @@
 #include "paperUI/paperUI.h"
 #include "motorPlotter/motorPlotter.h"
 #include "telemetryAnalyzer/telemetryAnalyzer.h"
+#include "debugConsole/debugConsole.h"
 
-const char* apps[] = { "PaperUI", "Motor Plotter", "Telemetry Analyzer" };
+const char* apps[] = { "PaperUI", "Motor Plotter", "Telemetry Analyzer", "Debug Console" };
 int selectedAppIndex = 2;
 
 void menuBar()
@@ -38,6 +39,7 @@ int main()
 	IGH.pushLayer<PaperUI>();
 	IGH.pushLayer<MotorPlotter>();
 	IGH.pushLayer<TelemetryAnalyzer>();
+	IGH.pushLayer<DebugConsole>();
 
 	if (!IGH.init("Eco Hub", 1300, 800))
 		return 1;

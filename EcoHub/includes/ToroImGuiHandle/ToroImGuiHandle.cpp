@@ -656,22 +656,35 @@ void ImGuiHandle::end()
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+// #include <iostream>
+
 namespace ImToro
 {
 	bool vCombo(const char* label, int* current_item, ::std::vector<::std::string> items, int popup_max_height_in_items)
 	{
-		if (ImGui::BeginCombo(label, items[*current_item].c_str()))
+		if (items.empty())
 		{
-			for (int i = 0; i < items.size(); i++)
+			if (ImGui::BeginCombo(label, "Empty"))
 			{
-				if (ImGui::Selectable(items[*current_item].c_str()))
-				{
-					*current_item = i;
-					return true;
-				}
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
 		}
+		else
+		{
+			if (ImGui::BeginCombo(label, items[*current_item].c_str()))
+			{
+				for (int i = 0; i < items.size(); i++)
+				{
+					if (ImGui::Selectable(items[i].c_str()))
+					{
+						*current_item = i;
+						// std::cout << "NUM: " << i << "\n";
+					}
+				}
+				ImGui::EndCombo();
+			}
+		}
+		
 		return false;
 	}
 }
