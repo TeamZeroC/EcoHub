@@ -225,8 +225,8 @@ void PaperUI::__genCode()
 		if (curWidg.get_strType() == "Gauge")
 		{
 			ss << curWidg.get_name() << " = Gauge(canvas, ";
-			ss << (int)(curWidg.get_pos().x / 2) << ", " << (int)(curWidg.get_pos().y / 2) << ", ";
-			ss << (int)(curWidg.get_size().x / 2) << ", " << (int)(curWidg.get_size().y / 2) << ", ";
+			ss << (int)(curWidg.get_pos().x) << ", " << (int)(curWidg.get_pos().y) << ", ";
+			ss << (int)(curWidg.get_size().x) << ", " << (int)(curWidg.get_size().y) << ", ";
 			ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::minVal) << ", ";
 			ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::maxVal) << ", ";
 			ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::g_orientation) + 1 << ");\n";
@@ -234,8 +234,8 @@ void PaperUI::__genCode()
 		else if (curWidg.get_strType() == "SSDisplay")
 		{
 			ss << curWidg.get_name() << " = SSDisplay(canvas, ";
-			ss << (int)(curWidg.get_pos().x / 2) << ", " << (int)(curWidg.get_pos().y / 2) << ", ";
-			ss << (int)(curWidg.get_size().x / 2) << ", " << (int)(curWidg.get_size().y / 2) << ", ";
+			ss << (int)(curWidg.get_pos().x) << ", " << (int)(curWidg.get_pos().y) << ", ";
+			ss << (int)(curWidg.get_size().x) << ", " << (int)(curWidg.get_size().y) << ", ";
 			ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::o_margin) << ", ";
 			ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::v_margin) << ", ";
 			ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::thickness) << ", ";
@@ -245,14 +245,14 @@ void PaperUI::__genCode()
 		else if (curWidg.get_strType() == "Led")
 		{
 			ss << curWidg.get_name() << " = Led(canvas, ";
-			ss << (int)(curWidg.get_pos().x / 2) << ", " << (int)(curWidg.get_pos().y / 2) << ", ";
-			ss << (int)(curWidg.get_size().x / 2) << ");\n";
+			ss << (int)(curWidg.get_pos().x) << ", " << (int)(curWidg.get_pos().y) << ", ";
+			ss << (int)(curWidg.get_size().x) << ");\n";
 		}
 		else if (curWidg.get_strType() == "TextView")
 		{
 			ss << curWidg.get_name() << " = TextView(canvas, ";
-			ss << (int)(curWidg.get_pos().x / 2) << ", " << (int)(curWidg.get_pos().y / 2) << ", ";
-			ss << (int)(curWidg.get_size().x / 2) << ", " << (int)(curWidg.get_size().y / 2) << ", ";
+			ss << (int)(curWidg.get_pos().x) << ", " << (int)(curWidg.get_pos().y) << ", ";
+			ss << (int)(curWidg.get_size().x) << ", " << (int)(curWidg.get_size().y) << ", ";
 			std::string fontName;
 			switch (curWidg.get_TextView_font())
 			{
@@ -285,20 +285,20 @@ void PaperUI::__genCode()
 				needJ = false;
 			}
 			int wCount = curWidg.get_WArray_prop(WidgWArrayPropIndex::count);
-			int wW = curWidg.get_WArray_prop(WidgWArrayPropIndex::childW) / 2;
-			int wH = curWidg.get_WArray_prop(WidgWArrayPropIndex::childH) / 2;
-			int wO = curWidg.get_WArray_prop(WidgWArrayPropIndex::offset) / 2;
+			int wW = curWidg.get_WArray_prop(WidgWArrayPropIndex::childW);
+			int wH = curWidg.get_WArray_prop(WidgWArrayPropIndex::childH);
+			int wO = curWidg.get_WArray_prop(WidgWArrayPropIndex::offset);
 
 			if (curWidg.get_WArray_prop(WidgWArrayPropIndex::a_orientation) == 0)
 			{
 				ss << "j = 0;\n";
-				ss << "for (int i = " << (int)(curWidg.get_pos().x / 2) << "; i < " << (int)(curWidg.get_pos().x / 2) + wCount * wW + (wCount - 1) * wO << "; i += " << wW + wO << ")\n{\n\t";
+				ss << "for (int i = " << (int)(curWidg.get_pos().x) << "; i < " << (int)(curWidg.get_pos().x) + wCount * wW + (wCount - 1) * wO << "; i += " << wW + wO << ")\n{\n\t";
 				ss << curWidg.get_name() << "[j]";
 				switch (curWidg.get_WArray_prop(WidgWArrayPropIndex::type))
 				{
 				case 0:
 					ss << " = SSDisplay(canvas, ";
-					ss << "i, " << (int)(curWidg.get_pos().y / 2) << ", " << wW << ", " << wH << ", ";
+					ss << "i, " << (int)(curWidg.get_pos().y) << ", " << wW << ", " << wH << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::o_margin) << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::v_margin) << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::thickness) << ", ";
@@ -308,7 +308,7 @@ void PaperUI::__genCode()
 
 				case 1:
 					ss << " = Gauge(canvas, ";
-					ss << "i, " << (int)(curWidg.get_pos().y / 2) << ", " << wW << ", " << wH << ", ";
+					ss << "i, " << (int)(curWidg.get_pos().y) << ", " << wW << ", " << wH << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::minVal) << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::maxVal) << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::g_orientation) + 1 << ");\n";
@@ -316,12 +316,12 @@ void PaperUI::__genCode()
 
 				case 2:
 					ss << " = Led(canvas, ";
-					ss << "i, " << (int)(curWidg.get_pos().y / 2) << ", " << wW << ");\n";
+					ss << "i, " << (int)(curWidg.get_pos().y) << ", " << wW << ");\n";
 					break;
 
 				case 3:
 					ss << " = TextView(canvas, ";
-					ss << "i, " << (int)(curWidg.get_pos().y / 2) << ", " << wW << ", " << wH << ", ";
+					ss << "i, " << (int)(curWidg.get_pos().y) << ", " << wW << ", " << wH << ", ";
 					std::string fontName;
 					switch (curWidg.get_TextView_font())
 					{
@@ -353,13 +353,13 @@ void PaperUI::__genCode()
 			if (curWidg.get_WArray_prop(WidgWArrayPropIndex::a_orientation) == 1)
 			{
 				ss << "j = 0;\n";
-				ss << "for (int i = " << (int)(curWidg.get_pos().y / 2) << "; i < " << (int)(curWidg.get_pos().y / 2) + wCount * wH + (wCount - 1) * wO << "; i += " << wH + wO << ")\n{\n\t";
+				ss << "for (int i = " << (int)(curWidg.get_pos().y) << "; i < " << (int)(curWidg.get_pos().y) + wCount * wH + (wCount - 1) * wO << "; i += " << wH + wO << ")\n{\n\t";
 				ss << curWidg.get_name() << "[j]";
 				switch (curWidg.get_WArray_prop(WidgWArrayPropIndex::type))
 				{
 				case 0:
 					ss << " = SSDisplay(canvas, ";
-					ss << (int)(curWidg.get_pos().x / 2) << ", i" << ", " << wW << ", " << wH << ", ";
+					ss << (int)(curWidg.get_pos().x) << ", i" << ", " << wW << ", " << wH << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::o_margin) << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::v_margin) << ", ";
 					ss << curWidg.get_SSD_intProperties(WidgSSDpropIndex::thickness) << ", ";
@@ -369,7 +369,7 @@ void PaperUI::__genCode()
 
 				case 1:
 					ss << " = Gauge(canvas, ";
-					ss << (int)(curWidg.get_pos().x / 2) << ", i" << ", " << wW << ", " << wH << ", ";
+					ss << (int)(curWidg.get_pos().x) << ", i" << ", " << wW << ", " << wH << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::minVal) << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::maxVal) << ", ";
 					ss << curWidg.get_Gauge_intProperties(WidgGaugePropIndex::g_orientation) + 1 << ");\n";
@@ -377,12 +377,12 @@ void PaperUI::__genCode()
 
 				case 2:
 					ss << " = Led(canvas, ";
-					ss << (int)(curWidg.get_pos().x / 2) << ", i" << ", " << wW << ", ";
+					ss << (int)(curWidg.get_pos().x) << ", i" << ", " << wW << ", ";
 					break;
 
 				case 3:
 					ss << " = TextView(canvas, ";
-					ss << (int)(curWidg.get_pos().x / 2) << ", i" << ", " << wW << ", " << wH << ", ";
+					ss << (int)(curWidg.get_pos().x) << ", i" << ", " << wW << ", " << wH << ", ";
 					std::string fontName;
 					switch (curWidg.get_TextView_font())
 					{
@@ -527,7 +527,7 @@ void PaperUI::_displayWindow()
 						buffY[j] = NULL;
 						buffW[j] = NULL;
 						buffH[j] = NULL;
-						buffName[j] = NULL;
+						// buffName[j] = NULL;
 						buffConnectVar[j] = NULL;
 
 						buffSSDformat[j] = NULL;
@@ -660,10 +660,10 @@ void PaperUI::_propertyWindow()
 					WidgetsList[selected].set_name(newName);
 				}
 
-				for (int i = 0; i < IM_ARRAYSIZE(buffName); i++)
+				/*for (int i = 0; i < IM_ARRAYSIZE(buffName); i++)
 				{
 					buffName[i] = NULL;
-				}
+				}*/
 			}
 
 			// POSITION

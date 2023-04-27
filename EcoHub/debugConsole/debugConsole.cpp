@@ -1,6 +1,6 @@
 #include "debugConsole.h"
 
-std::vector<int> getAvailablePorts()
+std::vector<int> __getAvailablePorts()
 {
 	wchar_t lpTargetPath[5000]; // buffer to store the path of the COM PORTS
 	std::vector<int> portList;
@@ -10,15 +10,10 @@ std::vector<int> getAvailablePorts()
 		std::wstring str = L"COM" + std::to_wstring(i); // converting to COM0, COM1, COM2
 		DWORD res = QueryDosDevice(str.c_str(), lpTargetPath, 5000);
 
-
 		// Test the return value and error if any
 		if (res != 0) //QueryDosDevice returns zero if it didn't find an object
 		{
-			/*std::wstring ws(&lpTargetPath[0]);
-			std::string str2(ws.begin(), ws.end());
-			std::cout << str2 << "\n";*/
 			portList.push_back(i);
-			//std::cout << str << ": " << lpTargetPath << std::endl;
 		}
 		if (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 		{
@@ -29,13 +24,19 @@ std::vector<int> getAvailablePorts()
 
 void DebugConsole::_hwdConnectWindow()
 {
+	ImGui::SetNextWindowPos(ImVec2(40, 30), ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(210, 0), ImGuiCond_Appearing);
 	ImGui::Begin("HARDWARE");
 
+	ImGui::SetNextItemWidth(123);
 	ImToro::vCombo("COM PORT", &selectedPort, portsList);
+
+	ImGui::SetNextItemWidth(123);
+	ImGui::InputInt("BAUD RATE", &baudRate, 100, 1000);
 
 	if (ImGui::Button("REFRESH"))
 	{
-		portsListNum = getAvailablePorts();
+		portsListNum = __getAvailablePorts();
 		portsList.clear();
 		portsList.reserve(portsListNum.size());
 		for (int i = 0; i < portsListNum.size(); i++)
@@ -44,10 +45,24 @@ void DebugConsole::_hwdConnectWindow()
 		}
 	}
 
+	ImGui::SameLine();
+
 	if (ImGui::Button("CONNECT"))
 	{
-		ceSerial = new ce::ceSerial("\\\\.\\COM" + std::to_string(portsListNum[selectedPort]), 9600, 8, 'N', 1);
+		if (ceSerial)
+			delete ceSerial;
+
+		ceSerial = new ce::ceSerial("\\\\.\\COM" + std::to_string(portsListNum[selectedPort]), baudRate, 8, 'N', 1);
 		ceSerial->Open();
+	}
+	
+	if (ImGui::Button("DISCONNECT", ImVec2(123, 0)))
+	{
+		if (ceSerial)
+		{
+			ceSerial->Close();
+			delete ceSerial;
+		}
 	}
 
 	bool reading = true;
@@ -63,13 +78,18 @@ void DebugConsole::_hwdConnectWindow()
 		console.AddLog(msg.c_str());
 	}
 
-	//bool successFlag = false;
-	//char c = ceSerial->ReadChar(successFlag); // read a char
-	//if (successFlag) printf("Rx: %c\n", c);
-
 	ImGui::End();
 
 	console.Draw("DEBUG CONSOLE");
 
 	// ImGui::ShowDemoWindow();
+}
+
+void DebugConsole::_serialSendWindow()
+{
+	ImGui::SetNextWindowPos(ImVec2(40, 170), ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(210, 300), ImGuiCond_Appearing);
+	ImGui::Begin("SERIAL SEND");
+
+	ImGui::End();
 }

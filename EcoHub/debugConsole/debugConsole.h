@@ -14,8 +14,10 @@
 class ConsoleLogger
 {
 public:
-	ConsoleLogger()
+	ConsoleLogger(float consoleX, float consoleY, float consoleW, float consoleH, ce::ceSerial* ceSerial)
+		:consoleX(consoleX), consoleY(consoleY), consoleW(consoleW), consoleH(consoleH)
 	{
+		this->ceSerial = ceSerial;
 		_autoScroll = true;
 		Clear();
 	}
@@ -41,6 +43,8 @@ public:
 
 	void Draw(const char* title, bool* p_open = NULL)
 	{
+		ImGui::SetNextWindowPos(ImVec2(consoleX, consoleY), ImGuiCond_Appearing);
+		ImGui::SetNextWindowSize(ImVec2(consoleW, consoleH), ImGuiCond_Appearing);
 		if (!ImGui::Begin(title, p_open))
 		{
 			ImGui::End();
@@ -66,7 +70,7 @@ public:
 
 		ImGui::Separator();
 
-		if (ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar))
+		if (ImGui::BeginChild("scrolling", ImVec2(0, 560), true, ImGuiWindowFlags_HorizontalScrollbar)) // TODO: Fix size
 		{
 			if (clear)
 				Clear();
@@ -126,32 +130,57 @@ public:
 				ImGui::SetScrollHereY(1.0f);
 		}
 		ImGui::EndChild();
+
+		ImGui::Spacing();
+		ImGui::SetNextItemWidth(-100);
+		ImGui::InputText("##SendTextInput", sendMsg_buff, IM_ARRAYSIZE(sendMsg_buff));
+		ImGui::SameLine();
+		if (ImGui::Button("SEND", ImVec2(-1, 0)) && ceSerial)
+		{
+			ceSerial->Write(sendMsg_buff);
+			sendMsg_buff[0] = 0;
+		}
+
 		ImGui::End();
 	}
 
 private:
+	float consoleX, consoleY;
+	float consoleW, consoleH;
+
 	ImGuiTextBuffer     _buf;
 	ImGuiTextFilter     _filter;
 	ImVector<int>       _lineOffsets; // Index to lines offset. We maintain this with AddLog() calls.
 	bool                _autoScroll;  // Keep scrolling if already at the bottom.
+
+	ce::ceSerial* ceSerial;
+	char sendMsg_buff[200] = "";
 };
 
 class DebugConsole : public appLayer
 {
 private:
 	void _hwdConnectWindow();
+	void _serialSendWindow();
 
-	ConsoleLogger console;
+	ConsoleLogger console = ConsoleLogger(270, 30, 850, 654, ceSerial);
 	int selectedPort;
 	std::vector<std::string> portsList;
 	std::vector<int> portsListNum;
 	ce::ceSerial *ceSerial;
-	bool serialConnected = false;
+	int baudRate = 9600;
 
 public:
+	~DebugConsole()
+	{
+		if (ceSerial)
+			delete ceSerial;
+	}
+
 	virtual void update() override
 	{
 		_hwdConnectWindow();
+		_serialSendWindow();
 	}
 
 	virtual void menuBar() override
