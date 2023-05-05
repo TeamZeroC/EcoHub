@@ -142,6 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="motorPlotter\motorPlotter.cpp" />
     <ClCompile Include="paperUI\paperUI.cpp" />
+    <ClCompile Include="paperUI_legacy\paperUI_legacy.cpp" />
     <ClCompile Include="telemetryAnalyzer\telemetryAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="includes\ToroImGuiHandle\ToroImGuiHandle.h" />
     <ClInclude Include="motorPlotter\motorPlotter.h" />
     <ClInclude Include="paperUI\paperUI.h" />
+    <ClInclude Include="paperUI_legacy\paperUI_legacy.h" />
     <ClInclude Include="telemetryAnalyzer\telemetryAnalyzer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

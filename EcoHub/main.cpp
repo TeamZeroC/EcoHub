@@ -10,7 +10,7 @@
 #include "debugConsole/debugConsole.h"
 
 const char* apps[] = { "PaperUI", "Motor Plotter", "Telemetry Analyzer", "Debug Console" };
-int selectedAppIndex = 2;
+int selectedAppIndex = 0;
 
 void menuBar()
 {
@@ -48,7 +48,7 @@ int main()
 	ImGui::GetIO().IniFilename = NULL;
 
 	IGH.menuBar(menuBar);
-	IGH.setActiveWin(2);
+	IGH.setActiveWin(selectedAppIndex);
 
 	bool done = false;
 	while (!done)

@@ -582,7 +582,7 @@ bool ImGuiHandle::init(std::string bigParentName, unsigned int bigParentW, unsig
 	return true;
 }
 
-void ImGuiHandle::loop(bool *done)
+void ImGuiHandle::loop(bool* done)
 {
 	if (glfwWindowShouldClose(window))
 	{
@@ -662,12 +662,10 @@ namespace ImToro
 {
 	bool vCombo(const char* label, int* current_item, ::std::vector<::std::string> items, int popup_max_height_in_items)
 	{
-		if (items.empty())
+		bool toReturn = false;
+		if (items.empty() && ImGui::BeginCombo(label, "Empty"))
 		{
-			if (ImGui::BeginCombo(label, "Empty"))
-			{
-				ImGui::EndCombo();
-			}
+			ImGui::EndCombo();
 		}
 		else
 		{
@@ -678,13 +676,13 @@ namespace ImToro
 					if (ImGui::Selectable(items[i].c_str()))
 					{
 						*current_item = i;
+						toReturn = true;
 						// std::cout << "NUM: " << i << "\n";
 					}
 				}
 				ImGui::EndCombo();
 			}
 		}
-		
-		return false;
+		return toReturn;
 	}
 }

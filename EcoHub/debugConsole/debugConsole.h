@@ -14,7 +14,7 @@
 class ConsoleLogger
 {
 public:
-	ConsoleLogger(float consoleX, float consoleY, float consoleW, float consoleH, ce::ceSerial* ceSerial)
+	ConsoleLogger(float consoleX, float consoleY, float consoleW, float consoleH, ce::ceSerial** ceSerial)
 		:consoleX(consoleX), consoleY(consoleY), consoleW(consoleW), consoleH(consoleH)
 	{
 		this->ceSerial = ceSerial;
@@ -135,9 +135,9 @@ public:
 		ImGui::SetNextItemWidth(-100);
 		ImGui::InputText("##SendTextInput", sendMsg_buff, IM_ARRAYSIZE(sendMsg_buff));
 		ImGui::SameLine();
-		if (ImGui::Button("SEND", ImVec2(-1, 0)) && ceSerial)
+		if (ImGui::Button("SEND", ImVec2(-1, 0)) && (*ceSerial))
 		{
-			ceSerial->Write(sendMsg_buff);
+			(*ceSerial)->Write(sendMsg_buff);
 			sendMsg_buff[0] = 0;
 		}
 
@@ -153,7 +153,7 @@ private:
 	ImVector<int>       _lineOffsets; // Index to lines offset. We maintain this with AddLog() calls.
 	bool                _autoScroll;  // Keep scrolling if already at the bottom.
 
-	ce::ceSerial* ceSerial;
+	ce::ceSerial** ceSerial;
 	char sendMsg_buff[200] = "";
 };
 
@@ -163,7 +163,7 @@ private:
 	void _hwdConnectWindow();
 	void _serialSendWindow();
 
-	ConsoleLogger console = ConsoleLogger(270, 30, 850, 654, ceSerial);
+	ConsoleLogger console = ConsoleLogger(270, 30, 850, 654, &ceSerial);
 	int selectedPort;
 	std::vector<std::string> portsList;
 	std::vector<int> portsListNum;
