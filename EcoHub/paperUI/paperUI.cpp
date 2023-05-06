@@ -50,6 +50,8 @@ void Widget::update()
 	ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 0.0f);
 	varPops++;
 
+	pushCustomStyle();
+
 	// Highlighting selected widget
 	if (m_selected)
 	{
@@ -62,6 +64,7 @@ void Widget::update()
 	// Creating ch
 	ImGui::BeginChild(m_name.c_str(), m_size, true, c_flags);
 
+	popCustomStyle();
 	ImGui::PopStyleColor(colPops);
 	ImGui::PopStyleVar(varPops);
 
@@ -106,7 +109,7 @@ void Widget::propEdit(bool skipNamePos)
 
 void Widget::fullExport(std::string page, boost::property_tree::ptree& pt)
 {
-	page += "." + m_name + ".";
+	page += '.' + m_name + '.';
 
 	pt.put(page + "Pos.X", m_pos.x);
 	pt.put(page + "Pos.Y", m_pos.y);
@@ -152,7 +155,7 @@ void SSDisplay::selfPropEdit()
 
 void SSDisplay::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 0);
+	pt.put(page + "Type", WType_SSDisplay);
 	pt.put(page + "Format", m_format);
 	pt.put(page + "Margin.o", m_oMargin);
 	pt.put(page + "Margin.v", m_vMargin);
@@ -168,9 +171,23 @@ void SSDisplay::selfImport(boost::property_tree::ptree& ch)
 	m_sMargin = ch.get<int>(m_name + ".Margin.s");
 }
 
-void SSDisplay::selfGenCode(std::ofstream& outfile)
+void SSDisplay::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	if (!skipName)
+		ss << m_name;
+	ss << " = SSDisplay(canvas, ";
+	if (m_pos.x > 0)
+		ss << m_pos.x;
+	ss << offsetX + ", ";
+	if (m_pos.y > 0)
+		ss << m_pos.y;
+	ss << offsetY + ", ";
+	ss << m_size.x << ", " << m_size.y << ", ";
+	ss << m_oMargin << ", ";
+	ss << m_vMargin << ", ";
+	ss << m_thickness << ", ";
+	ss << m_sMargin << ", ";
+	ss << "\"" << m_format << "\");\n";
 }
 
 #pragma endregion //SSDISPLAY
@@ -196,7 +213,7 @@ void Gauge::selfPropEdit()
 
 void Gauge::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 1);
+	pt.put(page + "Type", WType_Gauge);
 	pt.put(page + "Min", m_min);
 	pt.put(page + "Max", m_max);
 	pt.put(page + "Orientation", m_orientation);
@@ -209,9 +226,21 @@ void Gauge::selfImport(boost::property_tree::ptree& ch)
 	m_orientation = ch.get<int>(m_name + ".Orientation");
 }
 
-void Gauge::selfGenCode(std::ofstream& outfile)
+void Gauge::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	if (!skipName)
+		ss << m_name;
+	ss << " = Gauge(canvas, ";
+	if (m_pos.x > 0)
+		ss << m_pos.x;
+	ss << offsetX + ", ";
+	if (m_pos.y > 0)
+		ss << m_pos.y;
+	ss << offsetY + ", ";
+	ss << m_size.x << ", " << m_size.y << ", ";
+	ss << m_min << ", ";
+	ss << m_max << ", ";
+	ss << m_orientation + 1 << ");\n";
 }
 
 #pragma endregion //GAUGE
@@ -230,7 +259,7 @@ void Led::selfPropEdit()
 
 void Led::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 2);
+	pt.put(page + "Type", WType_Led);
 }
 
 void Led::selfImport(boost::property_tree::ptree& ch)
@@ -238,9 +267,18 @@ void Led::selfImport(boost::property_tree::ptree& ch)
 
 }
 
-void Led::selfGenCode(std::ofstream& outfile)
+void Led::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	if (!skipName)
+		ss << m_name;
+	ss << " = Led(canvas, ";
+	if (m_pos.x > 0)
+		ss << m_pos.x;
+	ss << offsetX + ", ";
+	if (m_pos.y > 0)
+		ss << m_pos.y;
+	ss << offsetY + ", ";
+	ss << m_size.x << ");\n";
 }
 
 #pragma endregion //LED
@@ -261,7 +299,7 @@ void TextView::selfPropEdit()
 
 void TextView::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 3);
+	pt.put(page + "Type", WType_TextView);
 	pt.put(page + "Font", m_font);
 }
 
@@ -270,9 +308,41 @@ void TextView::selfImport(boost::property_tree::ptree& ch)
 	m_font = ch.get<int>(m_name + ".Font");
 }
 
-void TextView::selfGenCode(std::ofstream& outfile)
+void TextView::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	if (!skipName)
+		ss << m_name;
+	ss << " = TextView(canvas, ";
+	if (m_pos.x > 0)
+		ss << m_pos.x;
+	ss << offsetX + ", ";
+	if (m_pos.y > 0)
+		ss << m_pos.y;
+	ss << offsetY + ", ";
+	ss << m_size.x << ", " << m_size.y << ", ";
+	std::string fontName;
+	switch (m_font)
+	{
+	case 0:
+		fontName = "&font8";
+		break;
+	case 1:
+		fontName = "&font12";
+		break;
+	case 2:
+		fontName = "&font16";
+		break;
+	case 3:
+		fontName = "&font20";
+		break;
+	case 4:
+		fontName = "&font24";
+		break;
+	default:
+		fontName = "&font12";
+		break;
+	}
+	ss << fontName << ");\n";
 }
 
 #pragma endregion //TEXT_VIEW
@@ -289,29 +359,80 @@ void Button::selfPropEdit()
 	// BORDER
 	ImGui::Text("Border:");
 	ImGui::SameLine();
-	ImGui::Checkbox("##CheckBorder", &m_border);
+	ImGui::Checkbox("Has border", &m_border);
 
 	// FONT
 	ImGui::Text("Font:");
 	ImGui::Combo("##ComboFont", &m_font, "Font8\0Font12\0Font16\0Font20\0Font24\0\0");
+
+	// LABEL
+	ImGui::Text("Label:");
+	if (ImGui::InputTextWithHint(std::string("##InputLabel" + m_name).c_str(), m_label.c_str(), m_label_buff, IM_ARRAYSIZE(m_label_buff), ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		if (m_label_buff[0] != 0)
+		{
+			m_label = std::string(m_label_buff);
+		}
+
+		m_label_buff[0] = 0;
+	}
 }
 
 void Button::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 4);
+	pt.put(page + "Type", WType_Button);
 	pt.put(page + "Border", m_border);
 	pt.put(page + "Font", m_font);
+	pt.put(page + "Label", m_label);
 }
 
 void Button::selfImport(boost::property_tree::ptree& ch)
 {
 	m_border = ch.get<bool>(m_name + ".Border");
 	m_font = ch.get<int>(m_name + ".Font");
+	m_label = ch.get<std::string>(m_name + ".Label");
 }
 
-void Button::selfGenCode(std::ofstream& outfile)
+void Button::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	if (!skipName)
+		ss << m_name;
+	ss << " = Button(canvas, ";
+	if (m_pos.x > 0)
+		ss << m_pos.x;
+	ss << offsetX + ", ";
+	if (m_pos.y > 0)
+		ss << m_pos.y;
+	ss << offsetY + ", ";
+	ss << m_size.x << ", " << m_size.y << ", ";
+	std::string fontName;
+	switch (m_font)
+	{
+	case 0:
+		fontName = "&font8";
+		break;
+	case 1:
+		fontName = "&font12";
+		break;
+	case 2:
+		fontName = "&font16";
+		break;
+	case 3:
+		fontName = "&font20";
+		break;
+	case 4:
+		fontName = "&font24";
+		break;
+	default:
+		fontName = "&font12";
+		break;
+	}
+	ss << fontName << ", ";
+	ss << m_label << ", ";
+	if (m_border)
+		ss << 1 << ");\n";
+	else
+		ss << 0 << ");\n";
 }
 
 #pragma endregion //BUTTON
@@ -330,6 +451,16 @@ void WArray::_updateSize()
 		m_size.y = m_wChild->m_size.y * m_count + m_spacing * (m_count - 1);
 		m_size.x = m_wChild->m_size.x;
 	}
+}
+
+void WArray::pushCustomStyle()
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
+}
+
+void WArray::popCustomStyle()
+{
+	ImGui::PopStyleVar();
 }
 
 void WArray::content()
@@ -388,17 +519,20 @@ void WArray::selfPropEdit()
 	{
 		switch (m_wChildType)
 		{
-		case 0:
+		case WType_SSDisplay:
 			m_wChild = std::make_shared<SSDisplay>("SSDisplay", ImVec2(0, 0), ImVec2(0, 0));
 			break;
-		case 1:
+		case WType_Gauge:
 			m_wChild = std::make_shared<Gauge>("Gauge", ImVec2(0, 0), ImVec2(0, 0));
 			break;
-		case 2:
+		case WType_Led:
 			m_wChild = std::make_shared<Led>("Led", ImVec2(0, 0), ImVec2(0, 0));
 			break;
-		case 3:
+		case WType_TextView:
 			m_wChild = std::make_shared<TextView>("TextView", ImVec2(0, 0), ImVec2(0, 0));
+			break;
+		case WType_Button:
+			m_wChild = std::make_shared<Button>("Button", ImVec2(0, 0), ImVec2(0, 0));
 			break;
 		default:
 			break;
@@ -422,7 +556,7 @@ void WArray::selfPropEdit()
 
 void WArray::selfExport(std::string page, boost::property_tree::ptree& pt)
 {
-	pt.put(page + "Type", 5);
+	pt.put(page + "Type", WType_WArray);
 	pt.put(page + "Count", m_count);
 	pt.put(page + "Spacing", m_spacing);
 	pt.put(page + "Orientation", m_orientation);
@@ -460,16 +594,29 @@ void WArray::selfImport(boost::property_tree::ptree& ch)
 	}
 }
 
-void WArray::selfGenCode(std::ofstream& outfile)
+void WArray::selfGenCode(std::stringstream& ss, bool skipName, std::string offsetX, std::string offsetY)
 {
-
+	ss << "int j = 0;\n";
+	if (m_orientation == 0)
+	{
+		ss << "for (int i = " << m_pos.x << "; i < " << m_pos.x + m_count * m_wChild->m_size.x + (m_count - 1) * m_spacing << "; i += " << m_wChild->m_size.x + m_spacing << ")\n{\n\t";
+		ss << m_name << "[j]";
+		m_wChild->selfGenCode(ss, true, "i", std::to_string((int)m_pos.y));
+	}
+	else if (m_orientation == 1)
+	{
+		ss << "for (int i = " << m_pos.y << "; i < " << m_pos.y + m_count * m_wChild->m_size.y + (m_count - 1) * m_spacing << "; i += " << m_wChild->m_size.y + m_spacing << ")\n{\n\t";
+		ss << m_name << "[j]";
+		m_wChild->selfGenCode(ss, true, std::to_string((int)m_pos.x), "i");
+	}
+	ss << "\tj++;\n}\n";
 }
 
 #pragma endregion //WARRAY
 
-#pragma region PAPER_UI
+#pragma region FORM
 
-void PaperUI::__addWidget(WType type, std::string name, ImVec2 pos, ImVec2 size)
+void Form::addWidget(WType type, std::string name, ImVec2 pos, ImVec2 size)
 {
 	switch (type)
 	{
@@ -496,93 +643,151 @@ void PaperUI::__addWidget(WType type, std::string name, ImVec2 pos, ImVec2 size)
 	}
 }
 
+void Form::update()
+{
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		w->update();
+	}
+}
+
+void Form::deselectAll()
+{
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		w->m_selected = false;
+		w->m_name_buff[0] = 0;
+	}
+}
+
+void Form::handlePropertyes()
+{
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		if (!w->m_selected)
+			continue;
+
+		ImGui::Text("Selected: %s", w->m_name.c_str());
+		ImGui::Separator();
+
+		w->propEdit();
+	}
+}
+
+void Form::fullExport(boost::property_tree::ptree& pt)
+{
+	int i = 0;
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		pt.add("WLists." + m_name + '.' + std::to_string(i), w->m_name);
+		i++;
+	}
+
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		w->fullExport(m_name, pt);
+	}
+}
+
+void Form::widgetsImport(boost::property_tree::ptree& pt)
+{
+	boost::property_tree::ptree ch = pt.get_child(m_name);
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		w->selfImport(ch);
+	}
+}
+
+void Form::genCode(std::stringstream& ss)
+{
+	for (std::shared_ptr<Widget>& w : m_widgets)
+	{
+		w->selfGenCode(ss);
+	}
+}
+
+#pragma endregion //FORM
+
+#pragma region PAPER_UI
+
 void PaperUI::__exportWorkspace()
 {
 	boost::property_tree::ptree pt;
-	std::vector<std::string> m_forms = { "TOROPAGE" };
 
 	int i = 0;
-	for (std::string& s : m_forms)
+	for (Form& f : m_forms)
 	{
-		pt.add("Forms." + std::to_string(i), s);
+		if (f.count() == 0)
+			continue;
+
+		pt.add("Forms." + std::to_string(i), f.name());
+		f.fullExport(pt);
 		i++;
 	}
 
-	i = 0;
-	for (std::shared_ptr<Widget>& w : m_widgets)
-	{
-		pt.add("Widgets." + std::to_string(i), w->m_name);
-		i++;
-	}
-
-	for (std::shared_ptr<Widget>& w : m_widgets)
-	{
-		w->fullExport("TOROPAGE", pt);
-	}
-
-	std::string path;
 	std::stringstream ss;
 
-	// TODO: SELECT PATH
-
 	boost::property_tree::json_parser::write_json(ss, pt);
-	std::ofstream outfile("layout.json");
+	std::ofstream outfile(m_exportDialog.GetSelected().replace_extension(".json").string());
+	m_exportDialog.ClearSelected();
 	outfile << ss.str() << std::endl;
 	outfile.close();
 }
 
 void PaperUI::__importWorkspace()
 {
-	std::string path;
 	boost::property_tree::ptree pt;
 	boost::property_tree::ptree ch;
-	std::vector<std::string> m_forms;
+	std::vector<std::string> fNames;
 	std::vector<std::string> wNames;
 
-	// TODO: SELECT PATH
-
-	boost::property_tree::json_parser::read_json(path, pt);
+	boost::property_tree::json_parser::read_json(m_importDialog.GetSelected().string(), pt);
+	m_importDialog.ClearSelected();
 
 	ch = pt.get_child("Forms");
-	m_forms.reserve(ch.size());
+	fNames.reserve(ch.size());
 	for (int i = 0; i < ch.size(); i++)
 	{
-		m_forms.push_back(ch.get<std::string>(std::to_string(i)));
+		fNames.push_back(ch.get<std::string>(std::to_string(i)));
 	}
 
-	ch = pt.get_child("Widgets");
-	wNames.reserve(ch.size());
-	for (int i = 0; i < ch.size(); i++)
+	m_forms.clear();
+	for (std::string& f : fNames)
 	{
-		wNames.push_back(ch.get<std::string>(std::to_string(i)));
-	}
-
-	m_widgets.clear();
-	// TODO: HANDLE MULTIPLE FORMS
-	{
-		ch = pt.get_child(m_forms[0]);
+		ch = pt.get_child("WLists." + f);
+		wNames.clear();
+		wNames.reserve(ch.size());
 		for (int i = 0; i < ch.size(); i++)
 		{
-			int type = ch.get<int>(wNames[i] + ".Type");
-			ImVec2 pos = ImVec2(ch.get<float>(wNames[i] + ".Pos.X"), ch.get<float>(wNames[i] + ".Pos.Y"));
-			ImVec2 size = ImVec2(ch.get<float>(wNames[i] + ".Size.W"), ch.get<float>(wNames[i] + ".Size.H"));
-			__addWidget(type, wNames[i], pos, size);
+			wNames.push_back(ch.get<std::string>(std::to_string(i)));
 		}
-
-		for (std::shared_ptr<Widget>& w : m_widgets)
+		m_forms.emplace_back(f);
+		for (std::string& w : wNames)
 		{
-			w->selfImport(ch);
+			int type = pt.get<int>(f + '.' + w + ".Type");
+			ImVec2 pos = ImVec2(pt.get<float>(f + '.' + w + ".Pos.X"), pt.get<float>(f + '.' + w + ".Pos.Y"));
+			ImVec2 size = ImVec2(pt.get<float>(f + '.' + w + ".Size.W"), pt.get<float>(f + '.' + w + ".Size.H"));
+			(m_forms.end() - 1)->addWidget(type, w, pos, size);
 		}
+	}
+
+	for (Form& f : m_forms)
+	{
+		f.widgetsImport(pt);
 	}
 }
 
 void PaperUI::__genCode()
 {
-	std::string path;
+	std::stringstream ss;
 
-	// TODO: SELECT PATH
+	ss << "/* Automaticaly generated code, do not edit */\n";
+	m_forms[m_selectedForm].genCode(ss);
+	ss << "/* End of automaticly generated code */";
 
-	std::ofstream outfile(path);
+	// TODO: Preview generated code.
+
+	ImGui::SetClipboardText(ss.str().c_str());
 }
 
 void PaperUI::_paperScreenWindow()
@@ -602,23 +807,16 @@ void PaperUI::_paperScreenWindow()
 	// DESELECTING SELECTED WIDGET
 	if (ImGui::IsMouseHoveringRect(ImGui::GetWindowPos(), VEC_SUM2(ImGui::GetWindowPos(), ImGui::GetWindowSize())) && ImGui::IsMouseClicked(ImGuiMouseButton_Left) || ImGui::IsKeyPressed(ImGuiKey_Escape))
 	{
-		for (std::shared_ptr<Widget>& w : m_widgets)
-		{
-			w->m_selected = false;
-			w->m_name_buff[0] = 0;
-		}
+		m_forms[m_selectedForm].deselectAll();
 	}
 
 	// WIDGET RELESE EVENT
 	if (m_dragging != WType_None && !ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsMouseHoveringRect(ImGui::GetWindowPos(), VEC_SUM2(ImGui::GetWindowPos(), ImGui::GetWindowSize())))
 	{
-		__addWidget(m_dragging, "Widget" + std::to_string(m_widgets.size()), VEC_SUM4(ImGui::GetMousePos(), -ImGui::GetWindowPos(), -0.5 * m_spriteSizes[m_dragging], -ImVec2(0, WTITLE_H)), m_spriteSizes[m_dragging]);
+		m_forms[m_selectedForm].addWidget(m_dragging, "Widget" + std::to_string(m_forms[m_selectedForm].count()), VEC_SUM4(ImGui::GetMousePos(), -ImGui::GetWindowPos(), -0.5 * m_spriteSizes[m_dragging], -ImVec2(0, WTITLE_H)), m_spriteSizes[m_dragging]);
 	}
 
-	for (std::shared_ptr<Widget>& w : m_widgets)
-	{
-		w->update();
-	}
+	m_forms[m_selectedForm].update();
 
 	ImGui::End();
 }
@@ -673,16 +871,7 @@ void PaperUI::_propertyWindow()
 	ImGui::Begin("PROPERTY");
 	ImGui::SetWindowFontScale(m_scaling);
 
-	for (std::shared_ptr<Widget>& w : m_widgets)
-	{
-		if (!w->m_selected)
-			continue;
-
-		ImGui::Text("Selected: %s", w->m_name.c_str());
-		ImGui::Separator();
-
-		w->propEdit();
-	}
+	m_forms[m_selectedForm].handlePropertyes();
 
 	ImGui::End();
 }

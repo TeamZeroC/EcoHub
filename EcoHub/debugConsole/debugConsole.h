@@ -174,7 +174,10 @@ public:
 	~DebugConsole()
 	{
 		if (ceSerial)
+		{
+			ceSerial->Close();
 			delete ceSerial;
+		}
 	}
 
 	virtual void update() override

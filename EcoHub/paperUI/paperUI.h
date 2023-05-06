@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../includes/ToroImGuiHandle/ToroImGuiHandle.h"
+#include "../includes/imfilebrowser.h"
 
 #include <iostream>
 
@@ -15,6 +16,9 @@
 #define VEC_SUM4(A, B, C, D) ImVec2(A.x + B.x + C.x + D.x, A.y + B.y + C.y + D.y)
 
 #define WTITLE_H 19
+
+typedef int WType;
+enum WType_ { WType_None = -1, WType_SSDisplay, WType_Gauge, WType_Led, WType_TextView, WType_Button, WType_WArray };
 
 class MouseSelector
 {
@@ -51,6 +55,8 @@ public:
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
 	void update();
+	virtual void pushCustomStyle() {}
+	virtual void popCustomStyle() {}
 	virtual void content() = 0;
 
 	void propEdit(bool skipNamePos = false);
@@ -61,7 +67,7 @@ public:
 
 	virtual void selfImport(boost::property_tree::ptree& ch) = 0;
 
-	virtual void selfGenCode(std::ofstream &outfile) = 0;
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "") = 0;
 
 private:
 
@@ -76,7 +82,7 @@ public:
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	char m_format_buff[16] = "";
@@ -98,7 +104,7 @@ public:
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	int m_min = 3;
@@ -116,7 +122,7 @@ public:
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 
@@ -131,7 +137,7 @@ public:
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	int m_font = 0;
@@ -147,11 +153,13 @@ public:
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	bool m_border = true;
 	int m_font = 0;
+	char m_label_buff[128] = "";
+	std::string m_label = "Button";
 
 };
 
@@ -160,11 +168,13 @@ class WArray : public Widget
 public:
 	WArray(std::string name, ImVec2 pos, ImVec2 size) : Widget(name, pos, size) {}
 
+	virtual void pushCustomStyle() override;
+	virtual void popCustomStyle() override;
 	virtual void content();
 	virtual void selfPropEdit();
 	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::ofstream& outfile);
+	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	void _updateSize();
@@ -175,6 +185,30 @@ private:
 	int m_count = 0;
 	int m_spacing = 10;
 	int m_orientation = 0;
+
+};
+
+class Form
+{
+public:
+	Form(std::string name) { m_name = name; }
+
+	void addWidget(WType type, std::string name, ImVec2 pos, ImVec2 size);
+	void update();
+	void deselectAll();
+	void handlePropertyes();
+	void fullExport(boost::property_tree::ptree& pt);
+	void widgetsImport(boost::property_tree::ptree& pt);
+	void genCode(std::stringstream& ss);
+
+	void clear() { m_widgets.clear(); }
+
+	int count() { return m_widgets.size(); }
+	std::string name() { return m_name; }
+
+private:
+	std::string m_name;
+	std::vector<std::shared_ptr<Widget>> m_widgets;
 
 };
 
@@ -206,10 +240,6 @@ struct PropertyWindow
 class PaperUI : public appLayer
 {
 private:
-	typedef int WType;
-	enum WType_ { WType_None = -1, WType_SSDisplay, WType_Gauge, WType_Led, WType_TextView, WType_Button, WType_WArray };
-
-	void __addWidget(WType type, std::string name, ImVec2 pos, ImVec2 size);
 	void __exportWorkspace();
 	void __importWorkspace();
 	void __genCode();
@@ -225,12 +255,16 @@ private:
 	WidgetsWindow m_ww;
 	PropertyWindow m_pw;
 
-	std::vector<std::shared_ptr<Widget>> m_widgets;
+	int m_selectedForm = 0;
+	std::vector<Form> m_forms = { Form("TORO"), Form("PINNI") };
 
 	std::vector<std::string> m_spriteName = { "SSDisplay", "Gauge", "Led", "TextView", "Button", "WArray" };
 	std::vector<std::string> m_spriteTTip = { "SSDisplay", "Gauge", "Led", "TextView", "Button", "WArray" };
 	std::vector<ImVec2> m_spriteSizes = { ImVec2(80, 100), ImVec2(300, 50), ImVec2(50, 50), ImVec2(200, 100), ImVec2(120, 60), ImVec2(250, 120) };
 	int m_dragging;
+
+	ImGui::FileBrowser m_exportDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
+	ImGui::FileBrowser m_importDialog = ImGui::FileBrowser();
 
 public:
 	virtual void update()
@@ -238,6 +272,21 @@ public:
 		_paperScreenWindow();
 		_widgetsWindow();
 		_propertyWindow();
+
+		m_exportDialog.Display();
+		if (m_exportDialog.HasSelected())
+		{
+			__exportWorkspace();
+		}
+		m_importDialog.Display();
+		if (m_importDialog.HasSelected())
+		{
+			__importWorkspace();
+		}
+
+		ImGui::Begin("Test");
+		ImGui::InputInt("Form", &m_selectedForm);
+		ImGui::End();
 	}
 
 	virtual void menuBar() override
@@ -246,11 +295,14 @@ public:
 		{
 			if (ImGui::MenuItem("Export"))
 			{
-				__exportWorkspace();
+				m_exportDialog.SetTitle("EXPORT LAYOUT");
+				m_exportDialog.Open();
 			}
 			if (ImGui::MenuItem("Import"))
 			{
-				__importWorkspace();
+				m_importDialog.SetTitle("IMPORT LAYOUT (.json)");
+				m_importDialog.SetTypeFilters({ ".json" });
+				m_importDialog.Open();
 			}
 			if (ImGui::MenuItem("Gen code"))
 			{
