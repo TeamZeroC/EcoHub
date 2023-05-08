@@ -119,7 +119,7 @@ public:
 	bool init(std::string bigParentName);
 	bool init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH);
 #endif
-	
+
 #ifdef USE_OPENGL3
 	bool init(std::string bigParentName);
 	bool init(std::string bigParentName, unsigned int bigParentW, unsigned int bigParentH);
@@ -128,7 +128,7 @@ public:
 	void menuBar(WinBlock menuBarContent) { _menuBar = menuBarContent; }
 	void bgDeamon(WinBlock bgFunc) { _bgFunc = bgFunc; }
 
-	void loop(bool *done);
+	void loop(bool* done);
 
 	void end();
 
@@ -153,4 +153,40 @@ extern ImGuiHandle IGH;
 namespace ImToro
 {
 	bool vCombo(const char* label, int* current_item, ::std::vector<::std::string> items, int popup_max_height_in_items = -1);
+
+	class PopupWindow
+	{
+	public:
+		PopupWindow(const char* title, WinBlock content);
+		PopupWindow(const char* title, WinBlock content, ImVec2 size);
+
+		void update();
+
+		void show() { m_showFlag = true; }
+		// void hide() { m_visible = false; }
+
+		void setSize(ImVec2 size) { m_size = size; }
+
+	private:
+		std::string m_title;
+		ImVec2 m_size{ 200, 200 };
+		bool m_visible = false;
+		bool m_showFlag = false;
+
+		WinBlock m_content = nullptr;
+
+	};
 }
+
+/*
+template <class Functor>
+		struct ScopeGuard
+		{
+			ScopeGuard(Functor&& t) : func(std::move(t)) { }
+
+			~ScopeGuard() { func(); }
+
+		private:
+			Functor func;
+		};
+*/

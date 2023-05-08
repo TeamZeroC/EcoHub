@@ -649,6 +649,23 @@ void Form::update()
 	{
 		w->update();
 	}
+
+	// DELETING WIDGETS if (canc || backspace)
+	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) && (ImGui::IsKeyPressed(ImGuiKey_Delete) || ImGui::IsKeyPressed(ImGuiKey_Backspace)))
+	{
+		std::vector<int> toErase;
+		int i = 0;
+		for (std::shared_ptr<Widget>& w : m_widgets)
+		{
+			if (w->m_selected)
+				toErase.push_back(i);
+			i++;
+		}
+		for (i = 0; i < toErase.size(); i++)
+		{
+			m_widgets.erase(m_widgets.begin() + toErase[i]);
+		}
+	}
 }
 
 void Form::deselectAll()
@@ -785,9 +802,8 @@ void PaperUI::__genCode()
 	m_forms[m_selectedForm].genCode(ss);
 	ss << "/* End of automaticly generated code */";
 
-	// TODO: Preview generated code.
-
-	ImGui::SetClipboardText(ss.str().c_str());
+	m_generatedCodeCpp = ss.str();
+	// ImGui::SetClipboardText(ss.str().c_str());
 }
 
 void PaperUI::_paperScreenWindow()
@@ -798,7 +814,6 @@ void PaperUI::_paperScreenWindow()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("PAPER", nullptr, m_ps.w_flags);
-	ImGui::SetWindowFontScale(m_scaling);
 	ImGui::PopStyleColor();
 	ImGui::PopStyleVar(2);
 
@@ -826,7 +841,6 @@ void PaperUI::_widgetsWindow()
 	ImGui::SetNextWindowPos(m_ww.wPos, ImGuiCond_Appearing);
 	ImGui::SetNextWindowSize(m_ww.wSize, ImGuiCond_Appearing);
 	ImGui::Begin("WIDGETS");
-	ImGui::SetWindowFontScale(m_scaling);
 
 	for (int i = 0; i < m_spriteName.size(); i++)
 	{
@@ -869,11 +883,146 @@ void PaperUI::_propertyWindow()
 	ImGui::SetNextWindowPos(m_pw.wPos, ImGuiCond_Appearing);
 	ImGui::SetNextWindowSize(m_pw.wSize, ImGuiCond_Appearing);
 	ImGui::Begin("PROPERTY");
-	ImGui::SetWindowFontScale(m_scaling);
 
 	m_forms[m_selectedForm].handlePropertyes();
 
 	ImGui::End();
+}
+
+void PaperUI::_formsWindow()
+{
+	ImGui::SetNextWindowPos(m_fw.wPos, ImGuiCond_Appearing);
+	ImGui::SetNextWindowSize(m_fw.wSize, ImGuiCond_Appearing);
+	ImGui::Begin("WORKSPACE");
+
+	ImGui::Text("New form:");
+	if (ImGui::InputText("##InputFormName", m_fw.m_newFormName_buff, IM_ARRAYSIZE(m_fw.m_newFormName_buff), ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		if (m_fw.m_newFormName_buff[0] != 0)
+		{
+			m_forms.emplace_back(std::string(m_fw.m_newFormName_buff));
+			m_fw.m_newFormName_buff[0] = 0;
+		}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("ADD"))
+	{
+		if (m_fw.m_newFormName_buff[0] != 0)
+		{
+			m_forms.emplace_back(std::string(m_fw.m_newFormName_buff));
+			m_fw.m_newFormName_buff[0] = 0;
+		}
+	}
+
+	for (int i = 0; i < m_forms.size(); i++)
+	{
+		ImGui::RadioButton(m_forms[i].name().c_str(), &m_selectedForm, i);
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+			ImGui::OpenPopup(std::string("FormPropEditPopup" + std::to_string(i)).c_str());
+
+		if (ImGui::BeginPopup(std::string("FormPropEditPopup" + std::to_string(i)).c_str()))
+		{
+			ImGui::Text("New name:");
+			if (ImGui::InputText("##InputFormNewName", m_fw.m_formNewName_buff, IM_ARRAYSIZE(m_fw.m_formNewName_buff), ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if (m_fw.m_formNewName_buff[0] != 0)
+				{
+					m_forms[i].name(std::string(m_fw.m_formNewName_buff));
+					m_fw.m_formNewName_buff[0] = 0;
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			ImGui::Spacing(); ImGui::Spacing(); ImGui::Separator(); ImGui::Separator(); ImGui::Spacing(); ImGui::Spacing();
+			if (ImGui::Selectable("Delete"))
+			{
+				m_forms.erase(m_forms.begin() + i);
+				if (m_selectedForm >= i)
+					m_selectedForm--;
+				ImGui::EndPopup();
+				break;
+			}
+			ImGui::EndPopup();
+		}
+	}
+
+	ImGui::End();
+}
+
+void PaperUI::_handleFileExplorers()
+{
+	m_exportDialog.Display();
+	if (m_exportDialog.HasSelected())
+	{
+		__exportWorkspace();
+	}
+	m_importDialog.Display();
+	if (m_importDialog.HasSelected())
+	{
+		__importWorkspace();
+	}
+}
+
+void PaperUI::_genCodePreviewPopup()
+{
+	if (m_showGenCodePreviewPopup)
+	{
+		ImGui::OpenPopup("CODE PREVIEW");
+		ImGui::SetNextWindowSize(ImVec2(750, 450), ImGuiCond_Appearing);
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		m_showGenCodePreviewPopup = false;
+	}
+	if (ImGui::BeginPopupModal("CODE PREVIEW", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
+	{
+		ImGui::BeginChild("SourceCode", ImVec2(-371, -40), true, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGui::TextUnformatted(m_generatedCodeCpp.c_str());
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
+			ImGui::OpenPopup("CopyPopupCpp");
+
+		if (ImGui::BeginPopup("CopyPopupCpp"))
+		{
+			if (ImGui::Selectable("COPY (.cpp)"))
+			{
+				ImGui::SetClipboardText(m_generatedCodeCpp.c_str());
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::EndChild();
+
+		ImGui::SameLine();
+
+		ImGui::BeginChild("HeaderCode", ImVec2(0, -40), true, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGui::TextUnformatted(m_generatedCodeH.c_str());
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
+			ImGui::OpenPopup("CopyPopupH");
+
+		if (ImGui::BeginPopup("CopyPopupH"))
+		{
+			if (ImGui::Button("COPY (.h)"))
+			{
+				ImGui::SetClipboardText(m_generatedCodeH.c_str());
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::EndChild();
+
+		ImGui::SetCursorPos(VEC_SUM3(ImVec2(750, 450), -ImVec2(90, 20), -ImVec2(6, 6)));
+		if (ImGui::Button("CLOSE", ImVec2(90, 20)))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
 }
 
 #pragma endregion //PAPER_UI

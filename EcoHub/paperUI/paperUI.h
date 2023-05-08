@@ -62,12 +62,12 @@ public:
 	void propEdit(bool skipNamePos = false);
 	virtual void selfPropEdit() = 0;
 
-	void fullExport(std::string page, boost::property_tree::ptree &pt);
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt) = 0;
+	void fullExport(std::string page, boost::property_tree::ptree& pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt) = 0;
 
 	virtual void selfImport(boost::property_tree::ptree& ch) = 0;
 
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "") = 0;
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "") = 0;
 
 private:
 
@@ -80,9 +80,9 @@ public:
 
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	char m_format_buff[16] = "";
@@ -102,9 +102,9 @@ public:
 
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	int m_min = 3;
@@ -120,9 +120,9 @@ public:
 
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 
@@ -135,9 +135,9 @@ public:
 
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	int m_font = 0;
@@ -151,9 +151,9 @@ public:
 
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	bool m_border = true;
@@ -172,14 +172,14 @@ public:
 	virtual void popCustomStyle() override;
 	virtual void content();
 	virtual void selfPropEdit();
-	virtual void selfExport(std::string page, boost::property_tree::ptree &pt);
+	virtual void selfExport(std::string page, boost::property_tree::ptree& pt);
 	virtual void selfImport(boost::property_tree::ptree& ch);
-	virtual void selfGenCode(std::stringstream &ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
+	virtual void selfGenCode(std::stringstream& ss, bool skipName = false, std::string offsetX = "", std::string offsetY = "");
 
 private:
 	void _updateSize();
 
-	std::vector<std::string> m_spriteName = { "SSDisplay", "Gauge", "Led", "TextView", "Button"};
+	std::vector<std::string> m_spriteName = { "SSDisplay", "Gauge", "Led", "TextView", "Button" };
 	int m_wChildType = 0;
 	std::shared_ptr<Widget> m_wChild = std::make_shared<SSDisplay>("SSDisplay", ImVec2(0, 0), ImVec2(0, 0));
 	int m_count = 0;
@@ -205,6 +205,7 @@ public:
 
 	int count() { return m_widgets.size(); }
 	std::string name() { return m_name; }
+	void name(const std::string& name) { m_name = name; }
 
 private:
 	std::string m_name;
@@ -237,6 +238,14 @@ struct PropertyWindow
 	ImVec2 wSize{ 250, 539 };
 };
 
+struct FormsWindow
+{
+	ImVec2 wPos{ 720, 30 };
+	ImVec2 wSize{ 160, 190 };
+	char m_newFormName_buff[128] = "";
+	char m_formNewName_buff[128] = "";
+};
+
 class PaperUI : public appLayer
 {
 private:
@@ -247,16 +256,17 @@ private:
 	void _paperScreenWindow();
 	void _widgetsWindow();
 	void _propertyWindow();
-
-
-	float m_scaling = 1.0f;
+	void _formsWindow();
+	void _handleFileExplorers();
+	void _genCodePreviewPopup();
 
 	PaperScreen m_ps;
 	WidgetsWindow m_ww;
 	PropertyWindow m_pw;
+	FormsWindow m_fw;
 
 	int m_selectedForm = 0;
-	std::vector<Form> m_forms = { Form("TORO"), Form("PINNI") };
+	std::vector<Form> m_forms = { Form("Form1") };
 
 	std::vector<std::string> m_spriteName = { "SSDisplay", "Gauge", "Led", "TextView", "Button", "WArray" };
 	std::vector<std::string> m_spriteTTip = { "SSDisplay", "Gauge", "Led", "TextView", "Button", "WArray" };
@@ -266,27 +276,19 @@ private:
 	ImGui::FileBrowser m_exportDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
 	ImGui::FileBrowser m_importDialog = ImGui::FileBrowser();
 
+	std::string m_generatedCodeCpp;
+	std::string m_generatedCodeH = "NOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\nNOT YET IMPLEMENTED\n";
+	bool m_showGenCodePreviewPopup = false;
+
 public:
 	virtual void update()
 	{
 		_paperScreenWindow();
 		_widgetsWindow();
 		_propertyWindow();
-
-		m_exportDialog.Display();
-		if (m_exportDialog.HasSelected())
-		{
-			__exportWorkspace();
-		}
-		m_importDialog.Display();
-		if (m_importDialog.HasSelected())
-		{
-			__importWorkspace();
-		}
-
-		ImGui::Begin("Test");
-		ImGui::InputInt("Form", &m_selectedForm);
-		ImGui::End();
+		_formsWindow();
+		_handleFileExplorers();
+		_genCodePreviewPopup();
 	}
 
 	virtual void menuBar() override
@@ -295,18 +297,20 @@ public:
 		{
 			if (ImGui::MenuItem("Export"))
 			{
-				m_exportDialog.SetTitle("EXPORT LAYOUT");
+				m_exportDialog.SetTitle("EXPORT WORKSPACE");
 				m_exportDialog.Open();
 			}
 			if (ImGui::MenuItem("Import"))
 			{
-				m_importDialog.SetTitle("IMPORT LAYOUT (.json)");
+				m_selectedForm = 0;
+				m_importDialog.SetTitle("IMPORT WORKSPACE (.json)");
 				m_importDialog.SetTypeFilters({ ".json" });
 				m_importDialog.Open();
 			}
 			if (ImGui::MenuItem("Gen code"))
 			{
 				__genCode();
+				m_showGenCodePreviewPopup = true;
 			}
 			ImGui::EndMenu();
 		}

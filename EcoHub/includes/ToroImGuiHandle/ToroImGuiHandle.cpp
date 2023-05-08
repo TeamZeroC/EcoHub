@@ -685,4 +685,39 @@ namespace ImToro
 		}
 		return toReturn;
 	}
+
+	PopupWindow::PopupWindow(const char* title, WinBlock content)
+	{
+		m_title = std::string(title);
+		m_content = content;
+	}
+
+	PopupWindow::PopupWindow(const char* title, WinBlock content, ImVec2 size)
+	{
+		m_title = std::string(title);
+		m_content = content;
+		m_size = size;
+	}
+
+	void PopupWindow::update()
+	{
+		if (m_showFlag)
+		{
+			ImGui::OpenPopup(m_title.c_str());
+			ImGui::SetNextWindowSize(m_size, ImGuiCond_Appearing);
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			m_showFlag = false;
+		}
+
+		if (ImGui::BeginPopupModal(m_title.c_str()))
+		{
+			if (m_content)
+				m_content();
+			else
+				if (ImGui::Button("CLOSE"))
+					ImGui::CloseCurrentPopup();
+
+			ImGui::EndPopup();
+		}
+	}
 }
