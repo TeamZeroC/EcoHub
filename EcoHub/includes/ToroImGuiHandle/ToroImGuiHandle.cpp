@@ -663,9 +663,10 @@ namespace ImToro
 	bool vCombo(const char* label, int* current_item, ::std::vector<::std::string> items, int popup_max_height_in_items)
 	{
 		bool toReturn = false;
-		if (items.empty() && ImGui::BeginCombo(label, "Empty"))
+		if (items.empty())
 		{
-			ImGui::EndCombo();
+			if (ImGui::BeginCombo(label, "Empty"))
+				ImGui::EndCombo();
 		}
 		else
 		{

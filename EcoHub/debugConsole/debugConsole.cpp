@@ -26,7 +26,10 @@ void DebugConsole::_hwdConnectWindow()
 {
 	ImGui::SetNextWindowPos(ImVec2(40, 30), ImGuiCond_Appearing);
 	ImGui::SetNextWindowSize(ImVec2(210, 0), ImGuiCond_Appearing);
-	ImGui::Begin("HARDWARE");
+	if (ceSerial.IsOpened())
+		ImGui::Begin("HARDWARE [connected]");
+	else
+		ImGui::Begin("HARDWARE");
 
 	ImGui::SetNextItemWidth(123);
 	ImToro::vCombo("COM PORT", &selectedPort, portsList);
@@ -47,29 +50,25 @@ void DebugConsole::_hwdConnectWindow()
 
 	ImGui::SameLine();
 
-	if (ImGui::Button("CONNECT"))
+	if (ImGui::Button("CONNECT") && !portsListNum.empty())
 	{
-		if (ceSerial)
-			delete ceSerial;
-
-		ceSerial = new ce::ceSerial("\\\\.\\COM" + std::to_string(portsListNum[selectedPort]), baudRate, 8, 'N', 1);
-		ceSerial->Open();
+		ceSerial = ce::ceSerial("\\\\.\\COM" + std::to_string(portsListNum[selectedPort]), baudRate, 8, 'N', 1);
+		ceSerial.Open();
 	}
-	
+
 	if (ImGui::Button("DISCONNECT", ImVec2(123, 0)))
 	{
-		if (ceSerial)
+		if (ceSerial.IsOpened())
 		{
-			ceSerial->Close();
-			delete ceSerial;
+			ceSerial.Close();
 		}
 	}
 
 	bool reading = true;
 	std::string msg;
-	while (reading && ceSerial)
+	while (reading && ceSerial.IsOpened())
 	{
-		msg += ceSerial->ReadChar(reading);
+		msg += ceSerial.ReadChar(reading);
 	}
 	if (msg.length() > 1)
 	{

@@ -10,7 +10,7 @@
 #include "debugConsole/debugConsole.h"
 
 const char* apps[] = { "PaperUI", "Motor Plotter", "Telemetry Analyzer", "Debug Console" };
-int selectedAppIndex = 0;
+int selectedAppIndex = 2;
 
 void menuBar()
 {
