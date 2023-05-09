@@ -289,17 +289,22 @@ void TelemetryAnalyzer::_telemetryPlotWindow()
 			}
 		}
 
+		for (int i = 0; i < customCursorPos.size(); i++)
+		{
+			ImPlot::DragLineX(i, &customCursorPos[i], ImVec4(.8f, .4f, .3f, 1.0f), 1.6f);
+		}
+
 		if (lapsFocusTool)
 		{
-			ImPlot::DragLineX(0, &dragLineStart, ImVec4(1.0f, 1.0f, .5f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
-			ImPlot::DragLineX(1, &dragLineEnd, ImVec4(1.0f, 1.0f, .5f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
+			ImPlot::DragLineX(customCursorPos.size(), &dragLineStart, ImVec4(1.0f, 1.0f, .5f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
+			ImPlot::DragLineX(customCursorPos.size() + 1, &dragLineEnd, ImVec4(1.0f, 1.0f, .5f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
 		}
 
 		if (missActTool)
 		{
 			for (int i = 0; i < missActPos.size(); i++)
 			{
-				ImPlot::DragLineX(2 + i, &missActPos[i], ImVec4(.5f, 1.0f, 1.0f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
+				ImPlot::DragLineX(customCursorPos.size() + 2 + i, &missActPos[i], ImVec4(.5f, 1.0f, 1.0f, 1.0f), 1.6f, ImPlotDragToolFlags_NoInputs);
 			}
 		}
 
@@ -310,7 +315,7 @@ void TelemetryAnalyzer::_telemetryPlotWindow()
 
 			for (int i = 0; i < findBadPos.size(); i++)
 			{
-				ImPlot::DragLineX(2 + missActPos.size() + i, &findBadPos[i], ImVec4(1.0f, .5f, 1.0f, .15f), 2.5f, ImPlotDragToolFlags_NoInputs);
+				ImPlot::DragLineX(customCursorPos.size() + 2 + missActPos.size() + i, &findBadPos[i], ImVec4(1.0f, .5f, 1.0f, .15f), 2.5f, ImPlotDragToolFlags_NoInputs);
 			}
 		}
 

@@ -116,8 +116,9 @@ private:
 	std::vector<ImVec2> findBadSimInstVel;
 	float findBadSpeedDelta = 3.00f;
 	bool findBadPlotSim = true;
-
 	std::vector<double> findBadPos;
+
+	std::vector<double> customCursorPos;
 
 public:
 	virtual void update() override
@@ -191,6 +192,17 @@ public:
 				ImGui::BeginTooltip();
 				ImGui::Text("Removes the last \"generic slot\"");
 				ImGui::EndTooltip();
+			}
+
+			if (ImGui::MenuItem("Add custom cursor"))
+			{
+				customCursorPos.push_back(0.0);
+			}
+
+			if (ImGui::MenuItem("Remove custom cursor"))
+			{
+				if (!customCursorPos.empty())
+					customCursorPos.pop_back();
 			}
 			ImGui::EndMenu();
 		}
